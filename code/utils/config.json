@@ -1,0 +1,5 @@
+{
+    "data_dir": "raw_data",
+    "output_dir": "generated_data",
+    "model_path": "model.pth"
+}
