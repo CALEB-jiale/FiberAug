@@ -1,5 +1,5 @@
 {
-    "data_dir": "raw_data",
-    "output_dir": "generated_data",
+    "data_dir": "../../dataset/raw_data",
+    "output_dir": "../../dataset/generated_data",
     "model_path": "model.pth"
 }
