@@ -1,3 +1,4 @@
+import os
 import cv2
 import numpy as np
 
@@ -5,7 +6,10 @@ class ImageProcessor:
     def __init__(self, input_path, output_path):
         self.input_path = input_path
         self.output_path = output_path
+        # Create output directory if it doesn't exist
+        os.makedirs(output_path, exist_ok=True)
         
+
     def process_image(self, image_path):
         # Read an image with OpenCV and convert it to the RGB colorspace
         image = cv2.imread(os.path.join(self.input_path, image_path))
@@ -18,6 +22,7 @@ class ImageProcessor:
         output_image_path = os.path.join(self.output_path, image_path)
         cv2.imwrite(output_image_path, processed_image)
         
+
     def _process(self, image):
         # Add image processing methods here
         # Return the processed image
@@ -26,9 +31,10 @@ class ImageProcessor:
 
 class Rotate(ImageProcessor):
     def __init__(self, input_path, output_path, degrees):
-        super().__init__(input_path, output_path)
+        super().__init__(input_path, os.path.join(output_path, "Rotate"))
         self.degrees = degrees
-        
+
+
     def _process(self, image):
         # Rotate clockwise by specified angle
         rows, cols = image.shape[:2]
@@ -38,12 +44,13 @@ class Rotate(ImageProcessor):
 
 class Crop(ImageProcessor):
     def __init__(self, input_path, output_path, x, y, width, height):
-        super().__init__(input_path, output_path)
+        super().__init__(input_path, os.path.join(output_path, "Crop"))
         self.x = x
         self.y = y
         self.width = width
         self.height = height
         
+
     def _process(self, image):
         # Crop specified area
         return image[self.y:self.y+self.height, self.x:self.x+self.width]
@@ -51,12 +58,12 @@ class Crop(ImageProcessor):
 
 class StyleTransfer(ImageProcessor):
     def __init__(self, input_path, output_path, model_path):
-        super().__init__(input_path, output_path)
+        super().__init__(input_path, os.path.join(output_path, "StyleTransfer"))
         self.model_path = model_path
         
         # Load model
         self.model = load_model(model_path)
-        
+
     def _process(self, image):
         # Style transfer
         stylized_image = self.model(image)
