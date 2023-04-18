@@ -4,6 +4,7 @@ import torch.nn as nn
 import numpy as np
 from tqdm import tqdm
 
+
 class ModelTrainer:
     def __init__(self, model, train_loader, val_loader, optimizer, criterion=None, device=None):
         self.model = model
@@ -11,14 +12,15 @@ class ModelTrainer:
         self.optimizer = optimizer
         self.train_loader = train_loader
         self.val_loader = val_loader
-        self.device = device if device is not None else torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        self.device = device if device is not None else torch.device(
+            "cuda" if torch.cuda.is_available() else "cpu")
         self.train_losses = []
         self.train_accs = []
         self.train_epoch_times = []
         self.val_losses = []
         self.val_accs = []
         self.val_epoch_times = []
-        
+
     def train_epoch(self, epoch):
         # Set the model to train mode
         self.model.train()
@@ -29,7 +31,8 @@ class ModelTrainer:
 
         for image_data, text_data, target in tqdm(self.train_loader):
             # Move the inputs and targets to the device
-            image_data, text_data, target = image_data.to(self.device), text_data.to(self.device), target.to(self.device)
+            image_data, text_data, target = image_data.to(
+                self.device), text_data.to(self.device), target.to(self.device)
 
             # Clear the gradients
             self.optimizer.zero_grad()
@@ -60,7 +63,7 @@ class ModelTrainer:
 
         print('Train Epoch: {} [Time: {:.2f}s]\tLoss: {:.6f} \tAccuracy: {:.2f}%'.format(
             epoch, epoch_time, train_loss, train_acc))
-        
+
     def test_epoch(self, epoch):
         # Set the model to eval mode
         self.model.eval()
@@ -72,7 +75,8 @@ class ModelTrainer:
         with torch.no_grad():
             for image_data, text_data, target in tqdm(self.val_loader):
                 # Move the inputs and targets to the device
-                image_data, text_data, target = image_data.to(self.device), text_data.to(self.device), target.to(self.device)
+                image_data, text_data, target = image_data.to(
+                    self.device), text_data.to(self.device), target.to(self.device)
 
                 # Forward pass
                 output = self.model(image_data, text_data)

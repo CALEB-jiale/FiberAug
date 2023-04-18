@@ -1,23 +1,26 @@
 import torch
 import torch.nn as nn
 
+
 class ModelPredictor:
     def __init__(self, model, device=None):
         # Init function, receiving model
         self.model = model
-        self.device = device if device is not None else torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        self.device = device if device is not None else torch.device(
+            "cuda" if torch.cuda.is_available() else "cpu")
 
         # Move the model to the device
         self.model.to(self.device)
 
         # Set the model to evaluation mode
         self.model.eval()
-    
+
     def predict(self, image_data, text_data):
         # Predict function which takes input and returns the predicted result
 
         # Move the inputs to the device
-        image_data, text_data = image_data.to(self.device), text_data.to(self.device)
+        image_data, text_data = image_data.to(
+            self.device), text_data.to(self.device)
 
         with torch.no_grad():
             # Forward pass
@@ -25,7 +28,7 @@ class ModelPredictor:
 
             # Get the predicted class
             _, predicted = output.max(1)
-        
+
         return predicted.item()
 
 

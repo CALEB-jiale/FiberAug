@@ -6,11 +6,13 @@ from utils.config import Config
 from matplotlib import pyplot as plt
 from tqdm import tqdm
 
+
 def visualize(image):
     plt.figure(figsize=(10, 10))
     plt.axis('off')
     plt.imshow(image)
     plt.waitforbuttonpress(0)
+
 
 def process(input_dir, output_dir, pipeline, processor_func):
     # Create output directory if it doesn't exist
@@ -23,11 +25,14 @@ def process(input_dir, output_dir, pipeline, processor_func):
             processor_func(processor, filename)
     print("Finished.")
 
+
 def process_image(processor, filename):
     processor.process_image(filename)
 
+
 def process_text(processor, filename):
     processor.process_text(filename)
+
 
 def main():
     # Load configuration file
@@ -36,8 +41,10 @@ def main():
     # Define input and output directories
     # image_input_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), config.data_dir, "images")
     # image_output_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), config.output_dir, "test1")
-    text_input_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), config.data_dir, "annotations")
-    text_output_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), config.output_dir, "test2")
+    text_input_dir = os.path.join(os.path.dirname(
+        os.path.abspath(__file__)), config.data_dir, "annotations")
+    text_output_dir = os.path.join(os.path.dirname(
+        os.path.abspath(__file__)), config.output_dir, "test2")
 
     # # test the code
     # print(os.path.join(image_input_dir, "000.jpg"))
@@ -52,10 +59,7 @@ def main():
     #     # image_processor.StyleTransfer(image_input_dir, image_output_dir, model_path=config.model_path)
     # ]
     text_pipeline = [
-        text_processor.DeleteLastChar(text_input_dir, text_output_dir)
-        # text_processor.AddNoise(text_input_dir, text_output_dir, noise_type='random'),
-        # text_processor.Replace(text_input_dir, text_output_dir, replace_type='synonyms')
-        # text_processor.Translate(text_input_dir, text_output_dir, src_lang='en', tgt_lang='fr')
+        text_processor.ChangeCase(text_input_dir, text_output_dir)
     ]
 
     # Process images and text using the shared 'process' function
