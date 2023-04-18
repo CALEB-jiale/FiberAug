@@ -1,8 +1,9 @@
 import json
+import os
 
 class Config:
     def __init__(self, config_file):
-        self.config_file = config_file
+        self.config_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), config_file)
 
         # Parse configuration file and load values
         self.data_dir = None

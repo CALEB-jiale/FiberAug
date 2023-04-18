@@ -10,7 +10,7 @@ class TextProcessor:
 
     def process_text(self, text_file):
         # Read in text file
-        with open(os.path.join(self.input_path, text_file), "r") as f:
+        with open(os.path.join(self.input_path, text_file), "r", encoding="utf-8") as f:
             data = json.load(f)
         
         # Processing of captions
@@ -23,8 +23,9 @@ class TextProcessor:
         
         # Save processed captions to file
         output_file_path = os.path.join(self.output_path, text_file)
-        with open(output_file_path, "w") as f:
-            json.dump(processed_captions, f)
+        with open(output_file_path, "w", encoding="utf-8") as f:
+            json.dump(processed_captions, f, indent=4, separators=(',', ': '), ensure_ascii=False)
+            f.write('\n')
     
     def _process(self, text):
         # Add text processing methods here
@@ -70,3 +71,11 @@ class TextProcessor:
 #     def _process(self, text):
 #         # Translate text from source language to target language
 #         return processed_translate_text(text, self.src_lang, self.tgt_lang)
+    
+class DeleteLastChar(TextProcessor):
+    def __init__(self, input_path, output_path):
+        super().__init__(input_path, os.path.join(output_path, "DeleteLastChar"))
+
+    def _process(self, text):
+        # Delete last character from text
+        return text[:-1]
