@@ -26,8 +26,12 @@ class TextProcessor:
         # Save processed captions to file
         output_file_path = os.path.join(self.output_path, text_file)
         with open(output_file_path, "w", encoding="utf-8") as f:
-            json.dump(processed_captions, f, indent=4,
-                      separators=(',', ': '), ensure_ascii=False)
+            json.dump(processed_captions,
+                      f,
+                      indent=4,
+                      separators=(',', ': '),
+                      ensure_ascii=False
+                      )
             f.write('\n')
 
     def _process(self, text):
@@ -37,7 +41,8 @@ class TextProcessor:
 
 
 class ChangeCase(TextProcessor):
-    def __init__(self, input_path, output_path,
+    def __init__(self, input_path,
+                 output_path,
                  granularity: str = "char",
                  cadence: float = 1.0,
                  case: str = "random",
@@ -64,8 +69,11 @@ class ChangeCase(TextProcessor):
                                 Defaults to 1.0.
         """
         super().__init__(input_path, os.path.join(output_path, "ChangeCase"))
-        self.aug = textaugs.ChangeCase(
-            granularity=granularity, cadence=cadence, case=case, p=p)
+        self.aug = textaugs.ChangeCase(granularity=granularity,
+                                       cadence=cadence,
+                                       case=case,
+                                       p=p
+                                       )
 
     def _process(self, text):
         # Change case for the text
