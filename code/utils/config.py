@@ -1,4 +1,3 @@
-# Config.py
 import json
 
 class Config:
@@ -11,6 +10,7 @@ class Config:
         self.model_path = None
         self.load_config()
 
+
     def load_config(self):
         # Load values from configuration file
         with open(self.config_file, "r") as f:
@@ -19,6 +19,7 @@ class Config:
             self.output_dir = config["output_dir"]
             self.model_path = config["model_path"]
         return self
+
 
 # # Usage example
 # config = Config("config.json")

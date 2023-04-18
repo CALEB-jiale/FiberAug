@@ -5,8 +5,9 @@ import numpy as np
 from tqdm import tqdm
 
 class ModelTrainer:
-    def __init__(self, model, optimizer, train_loader, val_loader, device=None):
+    def __init__(self, model, train_loader, val_loader, optimizer, criterion=None, device=None):
         self.model = model
+        self.criterion = criterion if criterion is not None else nn.CrossEntropyLoss()
         self.optimizer = optimizer
         self.train_loader = train_loader
         self.val_loader = val_loader
@@ -25,8 +26,8 @@ class ModelTrainer:
         correct = 0
         total = 0
         start_time = time.time()
-        
-        for batch_idx, (image_data, text_data, target) in enumerate(tqdm(self.train_loader)):
+
+        for image_data, text_data, target in tqdm(self.train_loader):
             # Move the inputs and targets to the device
             image_data, text_data, target = image_data.to(self.device), text_data.to(self.device), target.to(self.device)
 
@@ -45,10 +46,10 @@ class ModelTrainer:
             _, predicted = output.max(1)
             total += target.size(0)
             correct += predicted.eq(target).sum().item()
-            
+
         train_loss /= len(self.train_loader)
         train_acc = 100.*correct/total
-        
+
         end_time = time.time()
         epoch_time = end_time - start_time
 
@@ -56,7 +57,7 @@ class ModelTrainer:
         self.train_losses.append(train_loss)
         self.train_accs.append(train_acc)
         self.train_epoch_times.append(epoch_time)
-        
+
         print('Train Epoch: {} [Time: {:.2f}s]\tLoss: {:.6f} \tAccuracy: {:.2f}%'.format(
             epoch, epoch_time, train_loss, train_acc))
         
@@ -69,7 +70,7 @@ class ModelTrainer:
         start_time = time.time()
 
         with torch.no_grad():
-            for batch_idx, (image_data, text_data, target) in enumerate(tqdm(self.val_loader)):
+            for image_data, text_data, target in tqdm(self.val_loader):
                 # Move the inputs and targets to the device
                 image_data, text_data, target = image_data.to(self.device), text_data.to(self.device), target.to(self.device)
 
@@ -92,15 +93,14 @@ class ModelTrainer:
         self.val_losses.append(val_loss)
         self.val_accs.append(val_acc)
         self.val_epoch_times.append(epoch_time)
-        
+
         print('Val   Epoch: {} [Time: {:.2f}s]\tLoss: {:.6f} \tAccuracy: {:.2f}%'.format(
             epoch, epoch_time, val_loss, val_acc))
 
     def train(self, num_epochs):
-        self.criterion = nn.CrossEntropyLoss()
         for epoch in range(1, num_epochs+1):
             self.train_epoch(epoch)
             self.test_epoch(epoch)
 
     def get_training_time(self):
-        return np.cumsum([epoch_time for epoch_time in self.train_epoch_times])
+        return np.cumsum(list(self.train_epoch_times))

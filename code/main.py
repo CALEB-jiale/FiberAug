@@ -1,7 +1,8 @@
 import os
-# import utils.image_processor
-import utils.text_processor
+from utils import image_processor
+# from utils import text_processor
 from utils.config import Config
+from matplotlib import pyplot as plt
 
 def visualize(image):
     plt.figure(figsize=(10, 10))

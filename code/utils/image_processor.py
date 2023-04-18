@@ -56,15 +56,15 @@ class Crop(ImageProcessor):
         return image[self.y:self.y+self.height, self.x:self.x+self.width]
 
 
-class StyleTransfer(ImageProcessor):
-    def __init__(self, input_path, output_path, model_path):
-        super().__init__(input_path, os.path.join(output_path, "StyleTransfer"))
-        self.model_path = model_path
+# class StyleTransfer(ImageProcessor):
+#     def __init__(self, input_path, output_path, model_path):
+#         super().__init__(input_path, os.path.join(output_path, "StyleTransfer"))
+#         self.model_path = model_path
         
-        # Load model
-        self.model = load_model(model_path)
+#         # Load model
+#         self.model = load_model(model_path)
 
-    def _process(self, image):
-        # Style transfer
-        stylized_image = self.model(image)
-        return stylized_image.numpy()
+#     def _process(self, image):
+#         # Style transfer
+#         stylized_image = self.model(image)
+#         return stylized_image.numpy()
