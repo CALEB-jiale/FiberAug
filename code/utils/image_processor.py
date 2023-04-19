@@ -11,10 +11,10 @@ class ImageProcessor:
         # Create output directory if it doesn't exist
         os.makedirs(output_path, exist_ok=True)
         # Create txt file to store processing information
-        with open(os.path.join(output_path, 'processing_info.txt'), 'w') as f:
+        with open(os.path.join(output_path, 'processing_info.json'), 'w') as f:
             f.write(self._process_info())
 
-    def process_image(self, image_path):
+    def process(self, image_path):
         # Read an image with OpenCV and convert it to the RGB colorspace
         image = cv2.imread(os.path.join(self.input_path, image_path))
         image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)

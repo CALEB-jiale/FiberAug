@@ -9,8 +9,11 @@ class TextProcessor:
         self.output_path = output_path
         # Create output directory if it doesn't exist
         os.makedirs(output_path, exist_ok=True)
+        # Create txt file to store processing information
+        with open(os.path.join(output_path, 'processing_info.json'), 'w') as f:
+            f.write(self._process_info())
 
-    def process_text(self, text_file):
+    def process(self, text_file):
         # Read in text file
         with open(os.path.join(self.input_path, text_file), "r", encoding="utf-8") as f:
             data = json.load(f)
@@ -38,6 +41,10 @@ class TextProcessor:
         # Add text processing methods here
         # Return the processed text
         return text.upper()  # Example: Convert all text to uppercase
+
+    def _process_info(self):
+        # Return processing information
+        return 'Default processing information'
 
 
 class ChangeCase(TextProcessor):
@@ -73,13 +80,33 @@ class ChangeCase(TextProcessor):
                     The probability of the transform being applied.
                     Defaults to 1.0.
         """
+        self.granularity = granularity
+        self.cadence = cadence
+        self.case = case
+        self.p = p
         super().__init__(input_path, os.path.join(output_path, "ChangeCase"))
-        self.aug = textaugs.ChangeCase(granularity=granularity,
-                                       cadence=cadence,
-                                       case=case,
-                                       p=p
+
+        self.aug = textaugs.ChangeCase(granularity=self.granularity,
+                                       cadence=self.cadence,
+                                       case=self.case,
+                                       p=self.p
                                        )
 
     def _process(self, text):
         # Change case for the text
         return self.aug(text)
+
+    def _process_info(self):
+        info_dict = {"ChangeCase": []}
+
+        # Add information for each parameter
+        info = [{"key": "input_path", "value": self.input_path},
+                {"key": "output_path", "value": self.output_path},
+                {"key": "granularity", "value": str(self.granularity)},
+                {"key": "cadence", "value": str(self.cadence)},
+                {"key": "case", "value": str(self.case)},
+                {"key": "p", "value": str(self.p)}]
+        info_dict["ChangeCase"].extend(info)
+
+        # Convert dictionary to JSON string and return
+        return json.dumps(info_dict, indent=4)
