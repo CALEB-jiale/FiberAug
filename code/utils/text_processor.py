@@ -41,32 +41,37 @@ class TextProcessor:
 
 
 class ChangeCase(TextProcessor):
-    def __init__(self, input_path,
+    def __init__(self,
+                 input_path,
                  output_path,
                  granularity: str = "char",
                  cadence: float = 1.0,
                  case: str = "random",
                  p: float = 1.0
                  ):
-        """ Change case for the text
+        """Change case for the text
 
         Args:
-            input_path (_type_): Path of input file
-            output_path (_type_): Path of output file
-            granularity (str, optional): "char"(case of random chars is changed), 
-                                        "word"(case of random words is changed), 
-                                        "all"(case of the entire text is changed). 
-                                        Defaults to "char".
-            cadence (float, optional): How frequent (i.e. between this many characters/words) to change the case. 
-                                    Must be at least 1.0.
-                                    Non-integer values are used as an 'average' cadence. 
-                                    Not used for granularity 'all'.
-                                    Defaults to 1.0.
-            case (str, optional): The case to change words to; 
-                                valid values are 'lower', 'upper', 'title', or 'random' 
-                                Defaults to "random".
-            p (float, optional): The probability of the transform being applied.
-                                Defaults to 1.0.
+            input_path (str): Path of input file.
+            output_path (str): Path of output file.
+            granularity (str, optional): 
+                    "char"(case of random chars is changed), 
+                    "word"(case of random words is changed), 
+                    "all"(case of the entire text is changed). 
+                    Defaults to "char".
+            cadence (float, optional): 
+                    How frequent (i.e. between this many characters/words) to change the case. 
+                    Must be at least 1.0.
+                    Non-integer values are used as an 'average' cadence. 
+                    Not used for granularity 'all'.
+                    Defaults to 1.0.
+            case (str, optional): 
+                    The case to change words to; 
+                    valid values are 'lower', 'upper', 'title', or 'random' 
+                    Defaults to "random".
+            p (float, optional): 
+                    The probability of the transform being applied.
+                    Defaults to 1.0.
         """
         super().__init__(input_path, os.path.join(output_path, "ChangeCase"))
         self.aug = textaugs.ChangeCase(granularity=granularity,
