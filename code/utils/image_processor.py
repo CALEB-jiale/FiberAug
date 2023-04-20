@@ -266,6 +266,63 @@ class ShiftScaleRotate(ImageProcessor):
         return json.dumps(info_dict, indent=4)
 
 
+class Flip(ImageProcessor):
+    def __init__(self,
+                 input_path,
+                 output_path,
+                 flip_mode='horizontal',
+                 p=1.0
+                 ):
+        """Flip the input.
+
+        Args:
+            input_path (str): Path of input file.
+            output_path (str): Path of output file.
+            flip_mode (str, optional): 
+                    Type of flip to apply, can be: 
+                    1. 'horizontal': Flip the input either horizontally.
+                    2. 'vertical': Flip the input either vertically.
+                    3. None: Flip the input either horizontally, vertically or both horizontally and vertically. 
+                    Defaults to 'horizontal'.
+            p (float, optional): 
+                    Probability of applying the transform. 
+                    Defaults to 1.0.
+
+        Raises:
+            ValueError: If flip_mode is not one of 'horizontal', 'vertical' or None, a ValueError will be raised
+        """
+        self.p = p
+        self.flip_mode = flip_mode
+
+        if self.flip_mode == 'horizontal':
+            self.transform = A.HorizontalFlip(p=self.p)
+        elif self.flip_mode == 'vertical':
+            self.transform = A.VerticalFlip(p=self.p)
+        elif self.flip_mode is None:
+            self.transform = A.Flip(p=self.p)
+        else:
+            raise ValueError(
+                "Invalid flip mode. Allowed values are 'horizontal', 'vertical' or None.")
+
+        super().__init__(input_path, os.path.join(output_path, "Flip"))
+
+    def _process(self, image):
+        return self.transform(image=image)['image']
+
+    def _process_info(self):
+        info_dict = {"Flip": []}
+
+        # Add information for each parameter
+        info = [{"key": "input_path", "value": self.input_path},
+                {"key": "output_path", "value": self.output_path},
+                {"key": "flip_mode", "value": self.flip_mode},
+                {"key": "p", "value": str(self.p)}]
+        info_dict["Flip"].extend(info)
+
+        # Convert dictionary to JSON string and return
+        return json.dumps(info_dict, indent=4)
+
+
 # class StyleTransfer(ImageProcessor):
 #     def __init__(self, input_path, output_path, model_path):
 #         super().__init__(input_path, os.path.join(output_path, "StyleTransfer"))

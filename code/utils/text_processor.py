@@ -51,7 +51,7 @@ class ChangeCase(TextProcessor):
     def __init__(self,
                  input_path,
                  output_path,
-                 granularity: str = "char",
+                 granularity: str = "all",
                  cadence: float = 1.0,
                  case: str = "random",
                  p: float = 1.0
@@ -65,7 +65,7 @@ class ChangeCase(TextProcessor):
                     "char"(case of random chars is changed), 
                     "word"(case of random words is changed), 
                     "all"(case of the entire text is changed). 
-                    Defaults to "char".
+                    Defaults to "all".
             cadence (float, optional): 
                     How frequent (i.e. between this many characters/words) to change the case. 
                     Must be at least 1.0.
