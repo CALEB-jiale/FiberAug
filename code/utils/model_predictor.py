@@ -1,5 +1,4 @@
 import torch
-import torch.nn as nn
 
 
 class ModelPredictor:
@@ -32,21 +31,21 @@ class ModelPredictor:
         return predicted.item()
 
 
-# Usage example
-# # 创建模型并加载预训练的参数
+# # Usage example
+# # Create model and load pre-trained parameters
 # model = MyModel()
 # model.load_state_dict(torch.load('my_model.pth'))
 
-# # 创建预测器
+# # Create Predictor
 # predictor = ModelPredictor(model)
 
-# # 对单个输入进行预测
+# # Prediction for a single input
 # image_data = torch.rand(1, 3, 224, 224)
 # text_data = torch.rand(1, 100)
 # predicted = predictor.predict(image_data, text_data)
 # print(predicted)
 
-# # 对批量输入进行预测
+# # Prediction for batch input
 # image_data = torch.rand(4, 3, 224, 224)
 # text_data = torch.rand(4, 100)
 # predicted = predictor.predict(image_data, text_data)

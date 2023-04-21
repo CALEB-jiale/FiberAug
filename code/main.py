@@ -26,7 +26,7 @@ def process(input_dir, output_dir, pipeline):
     print("Finished.")
 
 
-def main():
+def data_augment():
     # Load configuration file
     config = Config("config.json")
 
@@ -67,4 +67,4 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    data_augment()
