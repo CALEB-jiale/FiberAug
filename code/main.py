@@ -26,23 +26,38 @@ def process(input_dir, output_dir, pipeline):
     print("Finished.")
 
 
-def data_augment():
+def text_augment():
+    # Load configuration file
+    config = Config("config.json")
+
+    # Define input and output directories
+    text_input_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                                  config.raw_data_dir,
+                                  "annotations")
+    text_output_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                                   config.generated_data_dir,
+                                   "test2")
+
+    # Define text processing pipelines
+    text_pipeline = [
+        text_processor.ChangeCase(text_input_dir, text_output_dir)
+    ]
+
+    # Process text using the shared 'process' function
+    process(text_input_dir, text_output_dir, text_pipeline)
+
+
+def image_augment():
     # Load configuration file
     config = Config("config.json")
 
     # Define input and output directories
     image_input_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)),
-                                   config.data_dir,
+                                   config.raw_data_dir,
                                    "images")
     image_output_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)),
-                                    config.output_dir,
+                                    config.generated_data_dir,
                                     "test1")
-    # text_input_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)),
-    #                               config.data_dir,
-    #                               "annotations")
-    # text_output_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)),
-    #                                config.output_dir,
-    #                                "test2")
 
     # # test the code
     # print(os.path.join(image_input_dir, "000.jpg"))
@@ -57,14 +72,10 @@ def data_augment():
         image_processor.Flip(image_input_dir, image_output_dir)
         # image_processor.StyleTransfer(image_input_dir, image_output_dir, model_path=config.model_path)
     ]
-    # text_pipeline = [
-    #     text_processor.ChangeCase(text_input_dir, text_output_dir)
-    # ]
 
-    # Process images and text using the shared 'process' function
+    # Process images using the shared 'process' function
     process(image_input_dir, image_output_dir, image_pipeline)
-    # process(text_input_dir, text_output_dir, text_pipeline)
 
 
 if __name__ == '__main__':
-    data_augment()
+    text_augment()
