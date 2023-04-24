@@ -10,6 +10,7 @@ class Config:
         # Parse configuration file and load values
         self.raw_data_dir = None
         self.generated_data_dir = None
+        self.tests_dir = None
         self.model_path = None
         self.load_config()
 
@@ -19,6 +20,7 @@ class Config:
             config = json.load(f)
             self.raw_data_dir = config["raw_data_dir"]
             self.generated_data_dir = config["generated_data_dir"]
+            self.tests_dir = config["tests_dir"]
             self.model_path = config["model_path"]
         return self
 

@@ -1,5 +1,6 @@
 {
     "raw_data_dir": "..\\dataset\\raw_data",
     "generated_data_dir": "..\\dataset\\generated_data",
+    "tests_dir": "..\\tests",
     "model_path": "model.pth"
 }

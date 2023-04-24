@@ -4,22 +4,32 @@ import torch
 import torch.nn as nn
 import numpy as np
 from tqdm import tqdm
+from torch.utils.data import DataLoader
+from torchvision.datasets import ImageFolder
+from torchvision.transforms import transforms
 
 
-class ModelTrainer:
-    def __init__(self, gen, dis, train_loader, test_loader, optimizer_gen, optimizer_dis, criterion=None, device=None, save_path=None):
+class GANTrainer:
+    def __init__(self, gen, dis, data_path, optimizer_gen=None, optimizer_dis=None, criterion=None, device=None, save_path=None):
         self.gen = gen
         self.dis = dis
         self.criterion = criterion if criterion is not None else nn.BCELoss()
-        self.optimizer_gen = optimizer_gen
-        self.optimizer_dis = optimizer_dis
-        self.train_loader = train_loader
-        self.test_loader = test_loader
+        self.optimizer_gen = optimizer_gen if optimizer_gen is not None else torch.optim.Adam(self.gen.parameters(),
+                                                                                              lr=0.0002,
+                                                                                              betas=(0.5, 0.999))
+        self.optimizer_dis = optimizer_dis if optimizer_dis is not None else torch.optim.Adam(self.dis.parameters(),
+                                                                                              lr=0.0002,
+                                                                                              betas=(0.5, 0.999))
+
         self.device = device if device is not None else torch.device(
             "cuda" if torch.cuda.is_available() else "cpu")
+
         self.save_path = save_path
         # Create output directory if it doesn't exist
         os.makedirs(save_path, exist_ok=True)
+
+        # Get train_loader and test_loader from data_path
+        self.train_loader, self.test_loader = self._get_data_loaders(data_path)
 
         self.train_losses = []
         self.train_epoch_times = []
@@ -91,13 +101,7 @@ class ModelTrainer:
         #     len(self.train_losses) == 1
         #     or train_loss < min(self.train_losses[:-1])
         # ):
-        #     state = {
-        #         'gen': self.gen.state_dict(),
-        #         'dis': self.dis.state_dict(),
-        #         'epoch': epoch
-        #     }
-        #     torch.save(state, os.path.join(self.save_path, "checkpoint.pt"))
-        #     print(f'Model parameters saved at epoch {epoch}')
+        #     self._save_model_parameters(epoch)
 
     def test_epoch(self, epoch):
         # Set the models to eval mode
@@ -157,14 +161,7 @@ class ModelTrainer:
                 or test_acc > max(self.test_accs[:-1])
                 or test_loss < min(self.test_losses[:-1])
             ):
-                state = {
-                    'gen': self.gen.state_dict(),
-                    'dis': self.dis.state_dict(),
-                    'epoch': epoch
-                }
-                torch.save(state, os.path.join(self.save_path,
-                                               "checkpoint.pt"))
-                print(f'Model parameters saved at epoch {epoch}')
+                self._save_model_parameters(epoch)
 
     def train(self, num_epochs):
         for epoch in range(1, num_epochs+1):
@@ -176,3 +173,69 @@ class ModelTrainer:
 
     def get_test_time(self):
         return np.cumsum(list(self.test_epoch_times))
+
+    def _save_model_parameters(self, epoch):
+        state = {
+            'gen': self.gen.state_dict(),
+            'dis': self.dis.state_dict(),
+            'epoch': epoch
+        }
+        torch.save(state, os.path.join(self.save_path, "checkpoint.pt"))
+        print(f'Model parameters saved at epoch {epoch}')
+
+    def save_data_to_files(self):
+        train_losses_file = os.path.join(self.save_path,
+                                         'train_losses.npy')
+        train_epoch_times_file = os.path.join(self.save_path,
+                                              'train_epoch_times.npy')
+        test_accs_file = os.path.join(self.save_path,
+                                      'test_accs.npy')
+        test_losses_file = os.path.join(self.save_path,
+                                        'test_losses.npy')
+        test_epoch_times_file = os.path.join(self.save_path,
+                                             'test_epoch_times.npy')
+
+        np.save(train_losses_file, np.array(self.train_losses))
+        np.save(train_epoch_times_file, np.array(self.train_epoch_times))
+        np.save(test_accs_file, np.array(self.test_accs))
+        np.save(test_losses_file, np.array(self.test_losses))
+        np.save(test_epoch_times_file, np.array(self.test_epoch_times))
+
+        print(f'Training and testing data saved to {self.save_path}')
+
+    def _get_data_loaders(self, data_path, batch_size=32, num_workers=1):
+        # Load dataset from folder
+        dataset = ImageFolder(root=data_path)
+
+        # Calculate the mean and standard deviation of the data
+        mean = [0, 0, 0]
+        std = [0, 0, 0]
+        for img, _ in dataset:
+            for i in range(3):
+                mean[i] += img[i, :, :].mean()
+                std[i] += img[i, :, :].std()
+        mean = [m / len(dataset) for m in mean]
+        std = [s / len(dataset) for s in std]
+
+        # Define transformations for image preprocessing
+        transform = transforms.Compose([
+            transforms.ToTensor(),
+            transforms.Normalize(mean=mean, std=std),
+        ])
+
+        # Load dataset from folder and apply transformations
+        dataset = ImageFolder(root=data_path, transform=transform)
+
+        # Create train_loader and test_loader from dataset
+        train_loader = DataLoader(dataset,
+                                  batch_size=batch_size,
+                                  shuffle=True,
+                                  num_workers=num_workers,
+                                  pin_memory=True)
+        test_loader = DataLoader(dataset,
+                                 batch_size=batch_size,
+                                 shuffle=False,
+                                 num_workers=num_workers,
+                                 pin_memory=True)
+
+        return train_loader, test_loader

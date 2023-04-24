@@ -1,5 +1,8 @@
 import os
 import cv2
+from models import wgan_gp
+from utils import gan_trainer
+from utils import gan_generator
 from utils import image_processor
 from utils import text_processor
 from utils.config import Config
@@ -75,6 +78,27 @@ def image_augment():
 
     # Process images using the shared 'process' function
     process(image_input_dir, image_output_dir, image_pipeline)
+
+
+def train_model():
+    # Load configuration file
+    config = Config("config.json")
+
+    # Paths and directories
+    data_dir = "path/to/raw/data/dir"
+    test_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                            config.tests_dir,
+                            "test0")
+    model_info_dir = os.path.join(test_dir, "model_info")
+    generated_images_dir = os.path.join(test_dir, "generated_images")
+
+    # Create directories if they don't exist
+    os.makedirs(test_dir, exist_ok=True)
+    os.makedirs(model_info_dir, exist_ok=True)
+    os.makedirs(generated_images_dir, exist_ok=True)
+
+    net_generator = wgan_gp.Generator()
+    net_discriminator = wgan_gp.Discriminator()
 
 
 if __name__ == '__main__':

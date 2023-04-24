@@ -1,11 +1,14 @@
+import os
 import torch
 from torchvision.utils import save_image
 
 
 class GANGenerator:
-    def __init__(self, generator, device=None):
+    def __init__(self, generator, save_dir, n_generated=0, device=None):
         # Init function, receiving generator
         self.generator = generator
+        self.save_dir = save_dir
+        self.n_generated = n_generated
         self.device = device if device is not None else torch.device(
             "cuda" if torch.cuda.is_available() else "cpu")
 
@@ -25,6 +28,15 @@ class GANGenerator:
         with torch.no_grad():
             generated_images = self.generator(z)
 
+        # Save generated images
+        for i in range(n_images):
+            save_image(generated_images[i],
+                       os.path.join(self.save_dir,
+                                    f"{self.n_generated+i}.png"))
+
+        # Update the number of generated images
+        self.n_generated += n_images
+
         return generated_images
 
 
@@ -34,7 +46,7 @@ class GANGenerator:
 # generator.load_state_dict(torch.load('generator.pth'))
 
 # # Create Generator
-# generator_wrapper = GANGenerator(generator)
+# generator_wrapper = GANGenerator(generator, "generated_images")
 
 # # Generate images
 # generated_images = generator_wrapper.generate(n_images=10, latent_dim=100)
