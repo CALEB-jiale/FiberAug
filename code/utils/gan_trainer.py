@@ -4,15 +4,21 @@ import torch
 import torch.nn as nn
 import numpy as np
 from tqdm import tqdm
+from matplotlib import pyplot as plt
 from torch.utils.data import DataLoader
-from torchvision.datasets import ImageFolder
 from torchvision.transforms import transforms
+from PIL import Image
+from torch.utils.data import Dataset
+# from my_dataset import *
 
 
 class GANTrainer:
     def __init__(self, gen, dis, data_path, optimizer_gen=None, optimizer_dis=None, criterion=None, device=None, save_path=None):
-        self.gen = gen
-        self.dis = dis
+        self.device = device if device is not None else torch.device(
+            "cuda" if torch.cuda.is_available() else "cpu")
+        self.gen = gen.to(device)
+        self.dis = dis.to(device)
+        self.save_path = save_path
         self.criterion = criterion if criterion is not None else nn.BCELoss()
         self.optimizer_gen = optimizer_gen if optimizer_gen is not None else torch.optim.Adam(self.gen.parameters(),
                                                                                               lr=0.0002,
@@ -21,10 +27,6 @@ class GANTrainer:
                                                                                               lr=0.0002,
                                                                                               betas=(0.5, 0.999))
 
-        self.device = device if device is not None else torch.device(
-            "cuda" if torch.cuda.is_available() else "cpu")
-
-        self.save_path = save_path
         # Create output directory if it doesn't exist
         os.makedirs(save_path, exist_ok=True)
 
@@ -45,13 +47,14 @@ class GANTrainer:
         train_loss = 0
         start_time = time.time()
 
+        print('\nEpoch: %d' % epoch)
         for real_images in tqdm(self.train_loader):
             real_images = real_images.to(self.device)
             batch_size = real_images.size(0)
 
             # Create labels for real and fake data
-            real_labels = torch.ones(batch_size, 1).to(self.device)
-            fake_labels = torch.zeros(batch_size, 1).to(self.device)
+            real_labels = torch.ones(batch_size, 1, device=self.device)
+            fake_labels = torch.zeros(batch_size, 1, device=self.device)
 
             # Update the discriminator
             self.optimizer_dis.zero_grad()
@@ -183,7 +186,7 @@ class GANTrainer:
         torch.save(state, os.path.join(self.save_path, "checkpoint.pt"))
         print(f'Model parameters saved at epoch {epoch}')
 
-    def save_data_to_files(self):
+    def save_train_data(self):
         train_losses_file = os.path.join(self.save_path,
                                          'train_losses.npy')
         train_epoch_times_file = os.path.join(self.save_path,
@@ -203,39 +206,68 @@ class GANTrainer:
 
         print(f'Training and testing data saved to {self.save_path}')
 
-    def _get_data_loaders(self, data_path, batch_size=32, num_workers=1):
-        # Load dataset from folder
-        dataset = ImageFolder(root=data_path)
+    def _get_data_loaders(self, data_path, batch_size=4, num_workers=4):
 
-        # Calculate the mean and standard deviation of the data
-        mean = [0, 0, 0]
-        std = [0, 0, 0]
-        for img, _ in dataset:
-            for i in range(3):
-                mean[i] += img[i, :, :].mean()
-                std[i] += img[i, :, :].std()
-        mean = [m / len(dataset) for m in mean]
-        std = [s / len(dataset) for s in std]
+        # # Calculate the mean and standard deviation of the data
+        # mean = [0, 0, 0]
+        # std = [0, 0, 0]
+        # for img, _ in dataset:
+        #     img_np = np.array(img)
+        #     for i in range(3):
+        #         mean[i] += img_np[:, :, i].mean()
+        #         std[i] += img_np[:, :, i].std()
+        # mean = [m / len(dataset) for m in mean]
+        # std = [s / len(dataset) for s in std]
 
         # Define transformations for image preprocessing
         transform = transforms.Compose([
+            transforms.RandomHorizontalFlip(),
             transforms.ToTensor(),
-            transforms.Normalize(mean=mean, std=std),
+            # transforms.Normalize(mean=mean, std=std),
+            transforms.Normalize(
+                (0.5, 0.5, 0.5), (0.5, 0.5, 0.5))  # 归一化到[-1, 1]之间
         ])
 
-        # Load dataset from folder and apply transformations
-        dataset = ImageFolder(root=data_path, transform=transform)
+        # Load dataset from folder
+        dataset = MyDataset(data_path, transform=transform)
+
+        # Split dataset
+        num_train = int(0.8 * len(dataset))
+        num_test = len(dataset) - num_train
+        train_dataset, test_dataset = torch.utils.data.random_split(
+            dataset, [num_train, num_test])
 
         # Create train_loader and test_loader from dataset
-        train_loader = DataLoader(dataset,
+        train_loader = DataLoader(train_dataset,
                                   batch_size=batch_size,
                                   shuffle=True,
                                   num_workers=num_workers,
                                   pin_memory=True)
-        test_loader = DataLoader(dataset,
+        test_loader = DataLoader(test_dataset,
                                  batch_size=batch_size,
                                  shuffle=False,
                                  num_workers=num_workers,
                                  pin_memory=True)
 
         return train_loader, test_loader
+
+
+class MyDataset(Dataset):
+    def __init__(self, data_path, transform=None):
+        self.data_path = data_path
+        self.image_paths = []
+        for root, _, filenames in os.walk(data_path):
+            for filename in filenames:
+                if filename.endswith('.jpg'):
+                    self.image_paths.append(os.path.join(root, filename))
+        self.transform = transform
+
+    def __getitem__(self, index):
+        image_path = self.image_paths[index]
+        image = Image.open(image_path).convert('RGB')
+        if self.transform:
+            image = self.transform(image)
+        return image
+
+    def __len__(self):
+        return len(self.image_paths)

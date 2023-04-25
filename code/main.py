@@ -85,7 +85,8 @@ def train_model():
     config = Config("config.json")
 
     # Paths and directories
-    data_dir = "path/to/raw/data/dir"
+    data_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                            config.all_data_dir)
     test_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)),
                             config.tests_dir,
                             "test0")
@@ -97,9 +98,25 @@ def train_model():
     os.makedirs(model_info_dir, exist_ok=True)
     os.makedirs(generated_images_dir, exist_ok=True)
 
+    # Initialize Generator and Discriminator
     net_generator = wgan_gp.Generator()
     net_discriminator = wgan_gp.Discriminator()
 
+    # Create GAN trainer
+    trainer = gan_trainer.GANTrainer(gen=net_generator,
+                                     dis=net_discriminator,
+                                     data_path=data_dir,
+                                     save_path=model_info_dir)
+    # Train GAN
+    trainer.train(2)
+    # Save train data
+    trainer.save_train_data()
+
+    # Generate images
+    gan_generator.GANGenerator(generator=net_generator,
+                               save_dir=generated_images_dir,
+                               n_generated=10)
+
 
 if __name__ == '__main__':
-    text_augment()
+    train_model()
