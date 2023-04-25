@@ -109,13 +109,13 @@ def train_model():
                                      save_path=model_info_dir)
     # Train GAN
     trainer.train(2)
-    # Save train data
-    trainer.save_train_data()
+    # # Save train data
+    # trainer.save_train_data()
 
-    # Generate images
-    gan_generator.GANGenerator(generator=net_generator,
-                               save_dir=generated_images_dir,
-                               n_generated=10)
+    # # Generate images
+    # gan_generator.GANGenerator(generator=net_generator,
+    #                            save_dir=generated_images_dir,
+    #                            n_generated=10)
 
 
 if __name__ == '__main__':

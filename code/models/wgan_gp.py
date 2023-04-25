@@ -3,27 +3,37 @@ import torch.nn as nn
 
 
 class Generator(nn.Module):
-    def __init__(self, nz=100, generator_feature_size=64, num_channels=3):
+    def __init__(self, nz=1000, generator_feature_size=64, num_channels=3):
         super(Generator, self).__init__()
         self.nz = nz
         self.generator_feature_size = generator_feature_size
         self.num_channels = num_channels
 
         self.main = nn.Sequential(
-            nn.ConvTranspose2d(self.nz, self.generator_feature_size *
-                               8, 4, 1, 0, bias=False),
+            nn.ConvTranspose2d(self.nz,
+                               self.generator_feature_size * 8,
+                               4,       # kernel_size
+                               1,       # stride
+                               0,       # padding
+                               bias=False),
             nn.BatchNorm2d(self.generator_feature_size * 8),
             nn.ReLU(True),
             nn.ConvTranspose2d(self.generator_feature_size * 8,
-                               self.generator_feature_size * 4, 4, 2, 1, bias=False),
+                               self.generator_feature_size * 4,
+                               4, 2, 1,
+                               bias=False),
             nn.BatchNorm2d(self.generator_feature_size * 4),
             nn.ReLU(True),
             nn.ConvTranspose2d(self.generator_feature_size * 4,
-                               self.generator_feature_size * 2, 4, 2, 1, bias=False),
+                               self.generator_feature_size * 2,
+                               4, 2, 1,
+                               bias=False),
             nn.BatchNorm2d(self.generator_feature_size * 2),
             nn.ReLU(True),
             nn.ConvTranspose2d(self.generator_feature_size * 2,
-                               self.num_channels, 4, 2, 1, bias=False),
+                               self.num_channels,
+                               4, 2, 1,
+                               bias=False),
             nn.Tanh()
         )
 
@@ -38,23 +48,27 @@ class Discriminator(nn.Module):
         self.num_channels = num_channels
 
         self.main = nn.Sequential(
-            nn.Conv2d(self.num_channels, self.discriminator_feature_size,
+            nn.Conv2d(self.num_channels,
+                      self.discriminator_feature_size,
                       4, 2, 1, bias=False),
             nn.LeakyReLU(0.2, inplace=True),
             nn.Conv2d(self.discriminator_feature_size,
-                      self.discriminator_feature_size * 2, 4, 2, 1, bias=False),
+                      self.discriminator_feature_size * 2,
+                      4, 2, 1, bias=False),
             nn.BatchNorm2d(self.discriminator_feature_size * 2),
             nn.LeakyReLU(0.2, inplace=True),
             nn.Conv2d(self.discriminator_feature_size * 2,
-                      self.discriminator_feature_size * 4, 4, 2, 1, bias=False),
+                      self.discriminator_feature_size * 4,
+                      4, 2, 1, bias=False),
             nn.BatchNorm2d(self.discriminator_feature_size * 4),
             nn.LeakyReLU(0.2, inplace=True),
             nn.Conv2d(self.discriminator_feature_size * 4,
-                      self.discriminator_feature_size * 8, 4, 2, 1, bias=False),
+                      self.discriminator_feature_size * 8,
+                      4, 2, 1, bias=False),
             nn.BatchNorm2d(self.discriminator_feature_size * 8),
             nn.LeakyReLU(0.2, inplace=True),
-            nn.Conv2d(self.discriminator_feature_size *
-                      8, 1, 4, 1, 0, bias=False)
+            nn.Conv2d(self.discriminator_feature_size * 8,
+                      1, 4, 1, 0, bias=False)
         )
 
     def forward(self, input):

@@ -4,12 +4,9 @@ import torch
 import torch.nn as nn
 import numpy as np
 from tqdm import tqdm
-from matplotlib import pyplot as plt
 from torch.utils.data import DataLoader
 from torchvision.transforms import transforms
-from PIL import Image
-from torch.utils.data import Dataset
-# from my_dataset import *
+from .my_dataset import MyDataset
 
 
 class GANTrainer:
@@ -47,7 +44,6 @@ class GANTrainer:
         train_loss = 0
         start_time = time.time()
 
-        print('\nEpoch: %d' % epoch)
         for real_images in tqdm(self.train_loader):
             real_images = real_images.to(self.device)
             batch_size = real_images.size(0)
@@ -61,6 +57,10 @@ class GANTrainer:
 
             # Forward pass for real images
             real_outputs = self.dis(real_images).reshape(-1, 1)
+            print()
+            print("images: ", np.shape(real_images))
+            print("outputs: ", np.shape(real_outputs))
+            print("labels: ", np.shape(real_labels))
             real_loss = self.criterion(real_outputs, real_labels)
             real_loss.backward()
 
@@ -167,7 +167,9 @@ class GANTrainer:
                 self._save_model_parameters(epoch)
 
     def train(self, num_epochs):
+        print("Start training")
         for epoch in range(1, num_epochs+1):
+            print('\nEpoch: %d' % epoch)
             self.train_epoch(epoch)
             self.test_epoch(epoch)
 
@@ -206,7 +208,7 @@ class GANTrainer:
 
         print(f'Training and testing data saved to {self.save_path}')
 
-    def _get_data_loaders(self, data_path, batch_size=4, num_workers=4):
+    def _get_data_loaders(self, data_path, batch_size=4, percent_train=0.8, num_workers=4):
 
         # # Calculate the mean and standard deviation of the data
         # mean = [0, 0, 0]
@@ -232,7 +234,7 @@ class GANTrainer:
         dataset = MyDataset(data_path, transform=transform)
 
         # Split dataset
-        num_train = int(0.8 * len(dataset))
+        num_train = int(percent_train * len(dataset))
         num_test = len(dataset) - num_train
         train_dataset, test_dataset = torch.utils.data.random_split(
             dataset, [num_train, num_test])
@@ -250,24 +252,3 @@ class GANTrainer:
                                  pin_memory=True)
 
         return train_loader, test_loader
-
-
-class MyDataset(Dataset):
-    def __init__(self, data_path, transform=None):
-        self.data_path = data_path
-        self.image_paths = []
-        for root, _, filenames in os.walk(data_path):
-            for filename in filenames:
-                if filename.endswith('.jpg'):
-                    self.image_paths.append(os.path.join(root, filename))
-        self.transform = transform
-
-    def __getitem__(self, index):
-        image_path = self.image_paths[index]
-        image = Image.open(image_path).convert('RGB')
-        if self.transform:
-            image = self.transform(image)
-        return image
-
-    def __len__(self):
-        return len(self.image_paths)
