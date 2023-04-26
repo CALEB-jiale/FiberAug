@@ -52,11 +52,12 @@ class GANTrainer:
             real_labels = torch.ones(batch_size, 1, device=self.device)
             fake_labels = torch.zeros(batch_size, 1, device=self.device)
 
+            # #################################################
             # Update the discriminator
             self.optimizer_dis.zero_grad()
 
             # Forward pass for real images
-            real_outputs = self.dis(real_images).reshape(-1, 1)
+            real_outputs = self.dis(real_images)  # .reshape(-1, 1)
             print()
             print("images: ", np.shape(real_images))
             print("outputs: ", np.shape(real_outputs))
@@ -65,7 +66,7 @@ class GANTrainer:
             real_loss.backward()
 
             # Forward pass for fake images
-            noise = torch.randn(batch_size, self.gen.nz, 1, 1).to(self.device)
+            noise = torch.randn(batch_size, self.gen.z_dim).to(self.device)
             fake_images = self.gen(noise)
             fake_outputs = self.dis(fake_images.detach()).reshape(-1, 1)
             fake_loss = self.criterion(fake_outputs, fake_labels)
@@ -75,6 +76,7 @@ class GANTrainer:
             dis_loss = real_loss + fake_loss
             self.optimizer_dis.step()
 
+            # #################################################
             # Update the generator
             self.optimizer_gen.zero_grad()
 
@@ -126,7 +128,7 @@ class GANTrainer:
                 fake_labels = torch.zeros(batch_size, 1).to(self.device)
 
                 # Generate fake images and calculate loss
-                noise = torch.randn(batch_size, self.gen.nz,
+                noise = torch.randn(batch_size, self.gen.z_dim,
                                     1, 1).to(self.device)
                 fake_images = self.gen(noise)
                 dis_output_fake = self.dis(fake_images.detach())
@@ -208,7 +210,7 @@ class GANTrainer:
 
         print(f'Training and testing data saved to {self.save_path}')
 
-    def _get_data_loaders(self, data_path, batch_size=4, percent_train=0.8, num_workers=4):
+    def _get_data_loaders(self, data_path, batch_size=1, percent_train=0.8, num_workers=4):
 
         # # Calculate the mean and standard deviation of the data
         # mean = [0, 0, 0]
