@@ -1,6 +1,6 @@
 import os
 import cv2
-from models import wgan_gp
+from models import gan
 from utils import gan_trainer
 from utils import gan_generator
 from utils import image_processor
@@ -99,8 +99,8 @@ def train_model():
     os.makedirs(generated_images_dir, exist_ok=True)
 
     # Initialize Generator and Discriminator
-    net_generator = wgan_gp.Generator()
-    net_discriminator = wgan_gp.Discriminator()
+    net_generator = gan.Generator()
+    net_discriminator = gan.Discriminator()
 
     # Create GAN trainer
     trainer = gan_trainer.GANTrainer(gen=net_generator,

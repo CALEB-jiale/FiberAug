@@ -57,11 +57,11 @@ class GANTrainer:
             self.optimizer_dis.zero_grad()
 
             # Forward pass for real images
-            real_outputs = self.dis(real_images)  # .reshape(-1, 1)
-            print()
-            print("images: ", np.shape(real_images))
-            print("outputs: ", np.shape(real_outputs))
-            print("labels: ", np.shape(real_labels))
+            real_outputs = self.dis(real_images).reshape(-1, 1)
+            # print()
+            # print("images: ", np.shape(real_images))
+            # print("outputs: ", np.shape(real_outputs))
+            # print("labels: ", np.shape(real_labels))
             real_loss = self.criterion(real_outputs, real_labels)
             real_loss.backward()
 
